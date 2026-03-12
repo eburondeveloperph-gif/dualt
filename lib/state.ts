@@ -129,47 +129,70 @@ CRITICAL BEHAVIOR:
   }
 
   const samples = `
-FEW-SHOT EXAMPLES:
+SEQUENTIAL TURN EXAMPLES:
 
-Example 1:
-- Guest (Tagalog): Magandang araw sayo.
-- Output: Goedendag.
+Tagalog ↔ ${staffLanguage} sequence:
+Turn 1 (Tagalog): "Magandang umaga!"
+Turn 2 (${staffLanguage}): "Goedemorgen!"
+Turn 3 (Tagalog): "Pwede po bang umupo dito?"
+Turn 4 (${staffLanguage}): "Mag ik hier zitten?"
+Turn 5 (Tagalog): "Ano pong nasa menu ninyo?"
+Turn 6 (${staffLanguage}): "Wat staat er op jullie menu?"
+Turn 7 (Tagalog): "Salamat po!"
+Turn 8 (${staffLanguage}): "Dank u!"
 
-Example 2:
-- Staff (${staffLanguage}): Goedendag, hoe gaat het met jou?
-- Output: Magandang araw, kumusta ka?
+Spanish ↔ ${staffLanguage} sequence:
+Turn 9 (Spanish): "¿Tienen café?"
+Turn 10 (${staffLanguage}): "Hebben jullie koffie?"
+Turn 11 (Spanish): "Sí, quiero un café, por favor."
+Turn 12 (${staffLanguage}): "Ja, ik wil graag een koffie."
+Turn 13 (Spanish): "¿Cuánto cuesta?"
+Turn 14 (${staffLanguage}): "Hoeveel kost het?"
+Turn 15 (Spanish): "Gracias."
+Turn 16 (${staffLanguage}): "Dank u."
 
-Example 3:
-- Guest (Japanese): こんばんは、部屋のキーをなくしてしまいました。
-- Output: Goedenavond, ik ben mijn kamersleutel kwijt.
+Korean ↔ ${staffLanguage} sequence:
+Turn 17 (Korean): "안녕하세요."
+Turn 18 (${staffLanguage}): "Hallo."
+Turn 19 (Korean): "커피 한 잔 주세요."
+Turn 20 (${staffLanguage}): "Graag een kop koffie."
+Turn 21 (Korean): "여기 앉아도 돼요?"
+Turn 22 (${staffLanguage}): "Mag ik hier zitten?"
+Turn 23 (Korean): "감사합니다."
+Turn 24 (${staffLanguage}): "Dank u."
 
-Example 4:
-- Staff (${staffLanguage}): Geen zorgen, ik maak direct een nieuwe voor u.
-- Output: ご安心ください、すぐに新しいものをお作りします。
+MULTI-TURN STAFF REPLY EXAMPLE:
+Turn 25 (Tagalog): "May libre po bang mesa?"
+Turn 26 (${staffLanguage}): "Is er een vrije tafel?"
+Turn 27 (${staffLanguage}): "Ja, natuurlijk."
+Turn 28 (Tagalog): "Oo, siyempre."
+Turn 29 (${staffLanguage}): "U mag daar gaan zitten."
+Turn 30 (Tagalog): "Pwede po kayong umupo doon."
+Turn 31 (${staffLanguage}): "Ik breng meteen de menukaart."
+Turn 32 (Tagalog): "Dadalhin ko agad ang menu."
+`;
 
-Example 5:
-- Guest (Arabic): مرحباً، أريد حجز غرفة.
-- Output: Hallo, ik wil een kamer boeken.
+  const wrongSamples = `
+WRONG TRANSLATION EXAMPLES (DO NOT FOLLOW THESE):
 
-Example 6:
-- Staff (${staffLanguage}): Zeker, voor hoeveel nachten?
-- Output: بالتأكيد، لِكَم ليلة؟
+Wrong Example 1: Staff reply incorrectly switches to English instead of the last detected guest language
+Turn 1 (Tagalog): "Magandang umaga!"
+Turn 2 (${staffLanguage}): "Goedemorgen!"
+Turn 3 (${staffLanguage}): "Hoe kan ik u helpen?"
+Turn 4 (English): "How can I help you?"
+Why wrong: After Tagalog was detected, the Staff reply should be translated back into Tagalog, not English.
 
-Example 7:
-- Guest (Spanish): ¿Dónde está el ascensor?
-- Output: Waar is de lift?
+Wrong Example 2: Guest speech is incorrectly translated into English instead of ${staffLanguage}
+Turn 1 (Spanish): "¿Dónde está el baño?"
+Turn 2 (English): "Where is the bathroom?"
+Why wrong: Guest speech must be translated into ${staffLanguage}, so the correct output is "Waar is het toilet?"
 
-Example 8:
-- Staff (${staffLanguage}): Het is om de hoek.
-- Output: Está a la vuelta de la esquina.
-
-Example 9:
-- Guest (Chinese): 你好，我想问一下健身房在几楼？
-- Output: Hallo, ik wil vragen op welke verdieping de fitnessruimte is.
-
-Example 10:
-- Staff (${staffLanguage}): De fitnessruimte bevindt zich op de derde verdieping.
-- Output: 健身房在三楼。
+Wrong Example 3: The system forgets the latest detected guest language across consecutive Staff replies
+Turn 1 (Korean): "물 한 잔 주세요."
+Turn 2 (${staffLanguage}): "Graag een glas water."
+Turn 3 (${staffLanguage}): "Natuurlijk, ik breng het zo."
+Turn 4 (English): "Of course, I will bring it right away."
+Why wrong: Once Korean was detected, consecutive Staff replies must continue in Korean until a new guest language is detected.
 `;
 
   const topicInstruction = topic
@@ -180,6 +203,8 @@ Example 10:
 ${instruction}
 
 ${samples}
+
+${wrongSamples}
 
 CRITICAL INSTRUCTIONS:
 - Output ONLY the translated text.

@@ -336,7 +336,11 @@ export default function StreamingConsole() {
           client.sendToolResponse({
             functionResponses: toolCall.functionCalls.map(f => ({
               id: f.id,
-              response: { output: { success: true } }
+              name: f.name,
+              response: {
+                success: true,
+                language,
+              }
             }))
           });
         }

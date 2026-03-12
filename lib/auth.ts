@@ -11,6 +11,7 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.trim();
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 const hasSupabaseConfig = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 let hasLoggedMissingSupabaseConfig = false;
+const disabledPersistenceTables = new Set<'translations' | 'user_settings'>();
 
 export const supabase = hasSupabaseConfig
   ? createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!)
@@ -30,6 +31,42 @@ const getSupabaseClient = () => {
 
   return null;
 };
+
+const isMissingPersistenceResourceError = (error: unknown) => {
+  const candidate = error as {
+    code?: string;
+    message?: string;
+    details?: string;
+    status?: number | string;
+    statusCode?: number | string;
+  } | null;
+
+  const status = Number(candidate?.status ?? candidate?.statusCode ?? 0);
+  const code = candidate?.code ?? '';
+  const details = `${candidate?.message ?? ''} ${candidate?.details ?? ''}`.toLowerCase();
+
+  return (
+    status === 404 ||
+    code === 'PGRST205' ||
+    details.includes('could not find') ||
+    details.includes('does not exist') ||
+    details.includes('not found')
+  );
+};
+
+const disablePersistenceTable = (table: 'translations' | 'user_settings') => {
+  if (disabledPersistenceTables.has(table)) {
+    return;
+  }
+
+  disabledPersistenceTables.add(table);
+  console.warn(
+    `Supabase persistence for "${table}" is disabled because the table or REST endpoint is unavailable.`
+  );
+};
+
+const canUsePersistenceTable = (table: 'translations' | 'user_settings') =>
+  !disabledPersistenceTables.has(table);
 
 // --- AUTH STORE ---
 interface AuthState {
@@ -70,18 +107,24 @@ export const updateUserSettings = async (
   newSettings: Partial<{ systemPrompt: string; voice1: string; voice2: string }>
 ) => {
   const client = getSupabaseClient();
-  if (!client) return Promise.resolve();
+  if (!client || !canUsePersistenceTable('user_settings')) return Promise.resolve();
 
   const { error } = await client
     .from('user_settings')
     .upsert({ user_id: userId, ...newSettings });
-  if (error) console.error('Error saving settings:', error);
+  if (error) {
+    if (isMissingPersistenceResourceError(error)) {
+      disablePersistenceTable('user_settings');
+      return Promise.resolve();
+    }
+    console.error('Error saving settings:', error);
+  }
   return Promise.resolve();
 };
 
 export const fetchUserConversations = async (userId: string): Promise<ConversationTurn[]> => {
   const client = getSupabaseClient();
-  if (!client) return [];
+  if (!client || !canUsePersistenceTable('translations')) return [];
 
   const { data, error } = await client
     .from('translations')
@@ -90,6 +133,10 @@ export const fetchUserConversations = async (userId: string): Promise<Conversati
     .order('timestamp', { ascending: true });
 
   if (error) {
+    if (isMissingPersistenceResourceError(error)) {
+      disablePersistenceTable('translations');
+      return [];
+    }
     console.error('Error fetching history:', error);
     return [];
   }
@@ -107,7 +154,7 @@ export const updateUserConversations = async (userId: string, turns: Conversatio
   if (!lastTurn || !lastTurn.isFinal) return;
 
   const client = getSupabaseClient();
-  if (!client) return;
+  if (!client || !canUsePersistenceTable('translations')) return;
 
   const { error } = await client
     .from('translations')
@@ -119,17 +166,27 @@ export const updateUserConversations = async (userId: string, turns: Conversatio
     });
 
   if (error) {
+    if (isMissingPersistenceResourceError(error)) {
+      disablePersistenceTable('translations');
+      return;
+    }
     console.error('Error saving turn to Supabase:', error);
   }
 };
 
 export const clearUserConversations = async (userId: string) => {
   const client = getSupabaseClient();
-  if (!client) return;
+  if (!client || !canUsePersistenceTable('translations')) return;
 
   const { error } = await client
     .from('translations')
     .delete()
     .eq('user_id', userId);
-  if (error) console.error('Error clearing history:', error);
+  if (error) {
+    if (isMissingPersistenceResourceError(error)) {
+      disablePersistenceTable('translations');
+      return;
+    }
+    console.error('Error clearing history:', error);
+  }
 };
