@@ -82,7 +82,7 @@ export default function ErrorScreen({ forceMissingKey = false }: { forceMissingK
   }
 
   if (!error) {
-    return <div style={{ display: 'none' }} />;
+    return null;
   }
 
   return (
