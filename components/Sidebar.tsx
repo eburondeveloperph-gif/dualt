@@ -2,7 +2,12 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { useSettings, useUI } from '../lib/state';
+import {
+  AUTO_DETECT_LABEL,
+  getActiveGuestLanguage,
+  useSettings,
+  useUI,
+} from '../lib/state';
 import c from 'classnames';
 import { AVAILABLE_LANGUAGES } from '../lib/constants';
 import { useLiveAPIContext } from '../contexts/LiveAPIContext';
@@ -12,12 +17,26 @@ import { useHistoryStore } from '../lib/history';
 export default function Sidebar() {
   const { isSidebarOpen, toggleSidebar, activeTab, setActiveTab } = useUI();
   const {
-    systemPrompt, voice1, voice2, guestLanguage, staffLanguage, topic,
-    setSystemPrompt, setGuestLanguage, setStaffLanguage, setTopic
+    systemPrompt,
+    voice1,
+    voice2,
+    guestLanguage,
+    staffLanguage,
+    topic,
+    lastGuestLanguage,
+    setSystemPrompt,
+    setLastGuestLanguage,
+    setTopic,
   } = useSettings();
   const { connected } = useLiveAPIContext();
   const { isSuperAdmin } = useAuth();
   const { history, clearHistory } = useHistoryStore();
+  const activeGuestLanguage = getActiveGuestLanguage(guestLanguage, lastGuestLanguage);
+  const guestLanguageOptions = AVAILABLE_LANGUAGES.some(
+    language => language.value === activeGuestLanguage,
+  )
+    ? AVAILABLE_LANGUAGES
+    : [{ name: activeGuestLanguage, value: activeGuestLanguage }, ...AVAILABLE_LANGUAGES];
 
   const handleSave = () => {
     toggleSidebar();
@@ -75,8 +94,18 @@ export default function Sidebar() {
               </label>
               <label>
                 Permanent Staff Language
-                <select value={staffLanguage} onChange={e => setStaffLanguage(e.target.value)}>
-                  {AVAILABLE_LANGUAGES.filter(lang => lang.value !== 'auto').map(lang => (
+                <div className="settings-info-row">
+                  <strong>Fixed</strong>
+                  <span>{staffLanguage}</span>
+                </div>
+              </label>
+              <label>
+                Guest Language
+                <select
+                  value={activeGuestLanguage}
+                  onChange={e => setLastGuestLanguage(e.target.value)}
+                >
+                  {guestLanguageOptions.map(lang => (
                     <option key={lang.value} value={lang.value}>
                       {lang.name}
                     </option>
@@ -84,7 +113,12 @@ export default function Sidebar() {
                 </select>
               </label>
               <div className="settings-info-row">
-                <strong>Guest Language:</strong> <span>{guestLanguage === 'auto' ? 'Auto Detect' : guestLanguage}</span>
+                <strong>Mode</strong>
+                <span>
+                  {activeGuestLanguage === 'auto'
+                    ? AUTO_DETECT_LABEL
+                    : `Follows latest detected guest language: ${activeGuestLanguage}`}
+                </span>
               </div>
               <label>
                 Topic (Optional)

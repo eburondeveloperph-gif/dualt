@@ -74,3 +74,31 @@ export function base64ToArrayBuffer(base64: string) {
   }
   return bytes.buffer;
 }
+
+export function base64ToUint8Array(base64: string) {
+  return new Uint8Array(base64ToArrayBuffer(base64));
+}
+
+export function arrayBufferToBase64(buffer: ArrayBuffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+
+  return window.btoa(binary);
+}
+
+export function mergeUint8Arrays(chunks: Uint8Array[]) {
+  const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+  const merged = new Uint8Array(totalLength);
+  let offset = 0;
+
+  chunks.forEach(chunk => {
+    merged.set(chunk, offset);
+    offset += chunk.length;
+  });
+
+  return merged;
+}

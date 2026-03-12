@@ -8,17 +8,26 @@ import cn from 'classnames';
 interface MicVisualizerProps {
   volume: number;
   isActive: boolean;
+  tone?: 'input' | 'output';
+  compact?: boolean;
+  className?: string;
 }
 
 const NUM_BARS = 32;
 
-const MicVisualizer: React.FC<MicVisualizerProps> = ({ volume, isActive }) => {
+const MicVisualizer: React.FC<MicVisualizerProps> = ({
+  volume,
+  isActive,
+  tone = 'input',
+  compact = false,
+  className,
+}) => {
   const bars = Array.from({ length: NUM_BARS }, (_, i) => {
     // Make the visualizer symmetrical and more dynamic in the center
     const barIndex = i < NUM_BARS / 2 ? i : NUM_BARS - 1 - i;
     const heightFactor = Math.pow(barIndex / (NUM_BARS / 2), 2);
-    const baseHeight = 2;
-    const maxHeight = 30;
+    const baseHeight = compact ? 1.5 : 2;
+    const maxHeight = compact ? 14 : 30;
     const dynamicHeight = Math.max(0, volume * maxHeight * (1.2 - heightFactor));
     const height = baseHeight + dynamicHeight;
 
@@ -32,7 +41,14 @@ const MicVisualizer: React.FC<MicVisualizerProps> = ({ volume, isActive }) => {
   });
 
   return (
-    <div className={cn('mic-visualizer-container', { active: isActive })}>
+    <div
+      className={cn(
+        'mic-visualizer-container',
+        tone,
+        { active: isActive, compact },
+        className,
+      )}
+    >
       {bars}
     </div>
   );

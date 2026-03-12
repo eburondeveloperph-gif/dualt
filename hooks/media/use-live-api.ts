@@ -20,7 +20,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GenAILiveClient } from '../../lib/genai-live-client';
-import { LiveConnectConfig, Modality, LiveServerToolCall } from '@google/genai';
+import { LiveConnectConfig } from '@google/genai';
 import { AudioStreamer } from '../../lib/audio-streamer';
 import { audioContext } from '../../lib/utils';
 import VolMeterWorket from '../../lib/worklets/vol-meter';
@@ -48,7 +48,7 @@ export function useLiveApi({
 }: {
   apiKey: string;
 }): UseLiveApiResults {
-  const { model } = useSettings();
+  const { model, resetSessionLanguageState } = useSettings();
   const client = useMemo(() => new GenAILiveClient(apiKey, model), [apiKey, model]);
 
   const audioStreamerRef = useRef<AudioStreamer | null>(null);
@@ -59,6 +59,9 @@ export function useLiveApi({
   const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
   const [isTtsMuted, setIsTtsMuted] = useState(false);
   const speakingCooldownRef = useRef<number | null>(null);
+  const agentTurnActiveRef = useRef(false);
+  const agentTurnCompleteRef = useRef(true);
+  const agentAudioPendingRef = useRef(false);
 
   const clearSpeakingCooldown = useCallback(() => {
     if (speakingCooldownRef.current !== null) {
@@ -88,6 +91,55 @@ export function useLiveApi({
     [clearSpeakingCooldown]
   );
 
+  const clearAgentTurnRefs = useCallback(() => {
+    agentTurnActiveRef.current = false;
+    agentTurnCompleteRef.current = true;
+    agentAudioPendingRef.current = false;
+  }, []);
+
+  const finishAgentTurnIfReady = useCallback(
+    (cooldownMs = 0) => {
+      if (!agentTurnActiveRef.current) {
+        return;
+      }
+
+      if (!agentTurnCompleteRef.current || agentAudioPendingRef.current) {
+        return;
+      }
+
+      clearAgentTurnRefs();
+      markAgentSilent(cooldownMs);
+    },
+    [clearAgentTurnRefs, markAgentSilent]
+  );
+
+  const markAgentTurnActive = useCallback(
+    ({ hasAudio = false }: { hasAudio?: boolean } = {}) => {
+      agentTurnActiveRef.current = true;
+      agentTurnCompleteRef.current = false;
+      if (hasAudio) {
+        agentAudioPendingRef.current = true;
+      }
+      markAgentSpeaking();
+    },
+    [markAgentSpeaking]
+  );
+
+  const markAgentAudioComplete = useCallback(() => {
+    agentAudioPendingRef.current = false;
+    finishAgentTurnIfReady(SPEAKING_COOLDOWN_MS);
+  }, [finishAgentTurnIfReady]);
+
+  const markAgentTurnComplete = useCallback(() => {
+    agentTurnCompleteRef.current = true;
+    finishAgentTurnIfReady(SPEAKING_COOLDOWN_MS);
+  }, [finishAgentTurnIfReady]);
+
+  const resetAgentTurnState = useCallback(() => {
+    clearAgentTurnRefs();
+    markAgentSilent();
+  }, [clearAgentTurnRefs, markAgentSilent]);
+
   const toggleTtsMute = useCallback(() => {
     setIsTtsMuted(prev => {
       const newMuted = !prev;
@@ -114,7 +166,7 @@ export function useLiveApi({
 
         const streamer = new AudioStreamer(audioCtx);
         streamer.onComplete = () => {
-          markAgentSilent(SPEAKING_COOLDOWN_MS);
+          markAgentAudioComplete();
         };
         audioStreamerRef.current = streamer;
         streamer
@@ -133,7 +185,7 @@ export function useLiveApi({
     return () => {
       isMounted = false;
     };
-  }, [audioStreamerRef, markAgentSilent]);
+  }, [audioStreamerRef, markAgentAudioComplete]);
 
   useEffect(() => {
     const onOpen = () => {
@@ -142,21 +194,33 @@ export function useLiveApi({
 
     const onClose = () => {
       setConnected(false);
-      markAgentSilent();
+      resetAgentTurnState();
     };
 
     const stopAudioStreamer = () => {
       if (audioStreamerRef.current) {
         audioStreamerRef.current.stop();
       }
-      markAgentSilent();
+      resetAgentTurnState();
     };
 
     const onAudio = (data: ArrayBuffer) => {
-      markAgentSpeaking();
+      markAgentTurnActive({ hasAudio: true });
       if (audioStreamerRef.current) {
         audioStreamerRef.current.addPCM16(new Uint8Array(data));
       }
+    };
+
+    const onOutputTranscription = () => {
+      markAgentTurnActive();
+    };
+
+    const onContent = () => {
+      markAgentTurnActive();
+    };
+
+    const onTurnComplete = () => {
+      markAgentTurnComplete();
     };
 
     // Bind event listeners
@@ -164,6 +228,9 @@ export function useLiveApi({
     client.on('close', onClose);
     client.on('interrupted', stopAudioStreamer);
     client.on('audio', onAudio);
+    client.on('outputTranscription', onOutputTranscription);
+    client.on('content', onContent);
+    client.on('turncomplete', onTurnComplete);
 
     return () => {
       // Clean up event listeners
@@ -171,25 +238,30 @@ export function useLiveApi({
       client.off('close', onClose);
       client.off('interrupted', stopAudioStreamer);
       client.off('audio', onAudio);
+      client.off('outputTranscription', onOutputTranscription);
+      client.off('content', onContent);
+      client.off('turncomplete', onTurnComplete);
     };
-  }, [client, markAgentSilent, markAgentSpeaking]);
+  }, [client, markAgentTurnActive, markAgentTurnComplete, resetAgentTurnState]);
 
   const connect = useCallback(async () => {
     if (!config) {
       throw new Error('config has not been set');
     }
     client.disconnect();
+    resetSessionLanguageState();
     await client.connect(config);
-  }, [client, config]);
+  }, [client, config, resetSessionLanguageState]);
 
   const disconnect = useCallback(async () => {
     client.disconnect();
     if (audioStreamerRef.current) {
       audioStreamerRef.current.stop();
     }
-    markAgentSilent();
+    resetSessionLanguageState();
+    resetAgentTurnState();
     setConnected(false);
-  }, [setConnected, client, markAgentSilent]);
+  }, [setConnected, client, resetAgentTurnState, resetSessionLanguageState]);
 
   return {
     client,

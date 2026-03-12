@@ -729,11 +729,60 @@ header .export-button {
   opacity: 1;
 }
 
+.mic-visualizer-container.compact {
+  width: 64px;
+  height: 16px;
+  margin-bottom: 0;
+  gap: 1px;
+}
+
 .mic-visualizer-bar {
   width: 3px;
   background-color: var(--accent-red);
   border-radius: 2px;
   transition: height 75ms linear;
+}
+
+.mic-visualizer-container.compact .mic-visualizer-bar {
+  width: 2px;
+}
+
+.mic-visualizer-container.output .mic-visualizer-bar {
+  background-color: var(--Blue-500);
+}
+
+.speaker-audio-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--Neutral-30);
+  background: rgba(31, 148, 255, 0.08);
+  color: var(--Neutral-60);
+  opacity: 0.72;
+  transition: opacity 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.speaker-audio-indicator.active {
+  opacity: 1;
+  color: var(--Blue-400);
+  border-color: var(--Blue-500);
+  background: rgba(31, 148, 255, 0.16);
+}
+
+.speaker-audio-indicator.muted {
+  opacity: 0.56;
+}
+
+.speaker-audio-indicator .icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.speaker-audio-bars {
+  pointer-events: none;
 }
 
 @keyframes opacity-pulse {

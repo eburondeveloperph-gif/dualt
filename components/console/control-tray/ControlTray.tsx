@@ -46,12 +46,14 @@ function ControlTray({ children }: ControlTrayProps) {
     connected,
     connect,
     disconnect,
+    volume: outputVolume,
     isAgentSpeaking,
     isTtsMuted,
     toggleTtsMute,
   } = useLiveAPIContext();
 
-  const isMicSuppressed = connected && !muted && isAgentSpeaking && !isTtsMuted;
+  const isMicSuppressed = connected && !muted && isAgentSpeaking;
+  const isOutputAudible = connected && isAgentSpeaking && !isTtsMuted;
 
   useEffect(() => {
     if (!connected && connectButtonRef.current) {
@@ -146,7 +148,7 @@ function ControlTray({ children }: ControlTrayProps) {
       ? muted
         ? 'Unmute microphone'
         : isMicSuppressed
-          ? 'Microphone paused while translated audio is playing'
+          ? 'Microphone paused until the translated response is fully finished'
           : 'Mute microphone'
       : 'Connect and start microphone'
     : 'Please sign in to use the translator';
@@ -190,6 +192,29 @@ function ControlTray({ children }: ControlTrayProps) {
           >
             <span className="icon">{isTtsMuted ? 'volume_off' : 'volume_up'}</span>
           </button>
+          <div
+            className={cn('speaker-audio-indicator', {
+              active: isOutputAudible,
+              muted: isTtsMuted,
+            })}
+            title={
+              isTtsMuted
+                ? 'Translator audio is muted'
+                : 'Translator audio playback indicator'
+            }
+            aria-live="polite"
+          >
+            <span className="icon">
+              {isTtsMuted ? 'volume_off' : 'graphic_eq'}
+            </span>
+            <MicVisualizer
+              volume={outputVolume}
+              isActive={isOutputAudible}
+              tone="output"
+              compact
+              className="speaker-audio-bars"
+            />
+          </div>
           <button
             className={cn('action-button')}
             onClick={handleReset}

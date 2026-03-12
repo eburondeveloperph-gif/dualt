@@ -6,12 +6,20 @@
 
 import React, { useEffect, useRef } from 'react';
 import './WelcomeScreen.css';
-import { useLogStore, useSettings } from '../../../lib/state';
+import {
+  AUTO_DETECT_LABEL,
+  getActiveGuestLanguage,
+  useLogStore,
+  useSettings,
+} from '../../../lib/state';
 
 const WelcomeScreen: React.FC = () => {
   const turns = useLogStore(state => state.turns);
-  const { guestLanguage, staffLanguage } = useSettings();
+  const { guestLanguage, staffLanguage, lastGuestLanguage } = useSettings();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const activeGuestLanguage = getActiveGuestLanguage(guestLanguage, lastGuestLanguage);
+  const guestLanguageLabel =
+    activeGuestLanguage === 'auto' ? AUTO_DETECT_LABEL : activeGuestLanguage;
 
   // Auto-scroll to bottom whenever turns update
   useEffect(() => {
@@ -28,7 +36,9 @@ const WelcomeScreen: React.FC = () => {
       <div className="welcome-screen">
         <div className="welcome-content empty">
           <h1>Dual Translator</h1>
-          <p className="welcome-tagline">Native {staffLanguage} & {guestLanguage} Translation</p>
+          <p className="welcome-tagline">
+            Native {staffLanguage} & {guestLanguageLabel} Translation
+          </p>
           <div className="status-indicator">
             <span className="dot"></span> Ready to translate
           </div>

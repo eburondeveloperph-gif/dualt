@@ -14,11 +14,11 @@ const PopUp: React.FC<PopUpProps> = ({ onClose }) => {
   return (
     <div className="popup-overlay">
       <div className="popup-content">
-        <h2>Welcome to Native Audio Function Call Sandbox</h2>
-        <p>Your starting point for building with native audio and function calling.</p>
+        <h2>Welcome to Dual Translator</h2>
+        <p>Your starting point for real-time speech translation with Gemini Live.</p>
         <p>To get started:</p>
         <ol>
-          <li><span className="icon">play_circle</span>Press Play to start streaming audio.</li>
+          <li><span className="icon">play_circle</span>Press Play to start live listening and translation.</li>
           <li><span className="icon">save_as</span>Copy this sandbox to create your own version.</li>
           <li><span className="icon">auto_awesome</span>Use the Code Assistant to customize and test your creation.</li>
         </ol>
