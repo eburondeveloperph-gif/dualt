@@ -28,18 +28,15 @@ RULES:
 1. When you hear ${lang1}, treat that speaker as the Staff member.
 2. Translate Staff speech immediately into the Guest's latest detected language.
 3. Always translate back from ${lang1} into the latest detected Guest language that was spoken most recently.
-4. If the latest detected Guest language is English, the Staff response must be translated into English.
-5. If the Guest has not spoken yet, default the Staff translation to English.
-6. When you hear a language other than ${lang1}, treat that speaker as the Guest and translate immediately into ${lang1}.
-7. Each new Guest utterance replaces the remembered Guest language for the next Staff response.
+4. If no Guest language has been detected yet, keep Staff output in ${lang1}.
+5. When you hear any language other than ${lang1}, treat that speaker as the Guest and translate immediately into ${lang1}.
+6. Each new Guest utterance replaces the remembered Guest language for the next Staff response.
 
 Example flow:
 - Guest speaks Arabic -> translate it to ${lang1}.
 - Staff speaks ${lang1} -> translate it to Arabic.
 - Guest speaks Filipino -> translate it to ${lang1}.
 - Staff speaks ${lang1} -> translate it to Filipino.
-- Guest speaks English -> translate it to ${lang1}.
-- Staff speaks ${lang1} -> translate it to English.
 - Guest speaks Spanish -> translate it to ${lang1}.
 - Staff speaks ${lang1} -> translate it to Spanish.
 `;
@@ -51,18 +48,15 @@ RULES:
 1. When you hear ${lang2}, treat that speaker as the Guest.
 2. Translate Guest speech immediately into the Staff member's latest detected language.
 3. Always translate back from ${lang2} into the latest detected Staff language that was spoken most recently.
-4. If the latest detected Staff language is English, the Guest response must be translated into English.
-5. If the Staff member has not spoken yet, default the Guest translation to English.
-6. When you hear a language other than ${lang2}, treat that speaker as the Staff member and translate immediately into ${lang2}.
-7. Each new Staff utterance replaces the remembered Staff language for the next Guest response.
+4. If no Staff language has been detected yet, keep Guest output in ${lang2}.
+5. When you hear any language other than ${lang2}, treat that speaker as the Staff member and translate immediately into ${lang2}.
+6. Each new Staff utterance replaces the remembered Staff language for the next Guest response.
 
 Example flow:
 - Staff speaks Arabic -> translate it to ${lang2}.
 - Guest speaks ${lang2} -> translate it to Arabic.
 - Staff speaks Dutch -> translate it to ${lang2}.
 - Guest speaks ${lang2} -> translate it to Dutch.
-- Staff speaks English -> translate it to ${lang2}.
-- Guest speaks ${lang2} -> translate it to English.
 - Staff speaks Spanish -> translate it to ${lang2}.
 - Guest speaks ${lang2} -> translate it to Spanish.
 `;
@@ -71,17 +65,14 @@ Example flow:
 Detect the spoken language for each turn.
 
 RULES:
-1. If the current speech is not English, translate it into English.
-2. If the current speech is English, translate it into the latest detected non-English language from the conversation context.
-3. If no non-English language has been detected yet, keep English output in English.
+1. Translate the current speech into the latest detected language from the other speaker.
+2. If only one language has been detected so far, keep the current speech in its original language.
 
 Example flow:
-- Speaker uses Arabic -> translate it to English.
-- Speaker uses English -> translate it to Arabic.
-- Speaker uses Spanish -> translate it to English.
-- Speaker uses English -> translate it to Spanish.
-- Speaker uses Dutch -> translate it to English.
-- Speaker uses English -> translate it to Dutch.
+- Speaker A uses Arabic -> detected Arabic.
+- Speaker B uses Dutch -> translate B to Arabic.
+- Speaker A uses Spanish -> translate A to Dutch (last detected for B).
+- Speaker B uses English -> translate B to Spanish (last detected for A).
 `;
   } else {
     instruction = `
