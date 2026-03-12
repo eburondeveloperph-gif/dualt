@@ -80,18 +80,8 @@ export default function Sidebar() {
                 </select>
               </label>
               <label>
-                Language 1 (Staff)
+                Permanent Staff Language
                 <select value={language1} onChange={e => setLanguage1(e.target.value)}>
-                  {AVAILABLE_LANGUAGES.map(lang => (
-                    <option key={lang.value} value={lang.value}>
-                      {lang.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Language 2 (Guest)
-                <select value={language2} onChange={e => setLanguage2(e.target.value)}>
                   {AVAILABLE_LANGUAGES.filter(lang => lang.value !== 'auto').map(lang => (
                     <option key={lang.value} value={lang.value}>
                       {lang.name}
@@ -99,6 +89,9 @@ export default function Sidebar() {
                   ))}
                 </select>
               </label>
+              <div className="settings-info-row">
+                <strong>Guest Language:</strong> <span>Auto Detect</span>
+              </div>
               <label>
                 Topic (Optional)
                 <textarea

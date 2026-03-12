@@ -16,31 +16,38 @@ const generateSystemPrompt = (lang1: string, lang2: string, topic: string) => {
   const isAuto1 = lang1 === 'auto';
   const isAuto2 = lang2 === 'auto';
 
-  // If one language is auto-detected and the other is fixed (e.g. Staff is Dutch),
-  // we need specific instructions for the bidirectional flow.
+  // We align: lang1 = Staff, lang2 = Guest
   let instruction = '';
 
-  if (isAuto1 && !isAuto2) {
-    // Visitor is Auto, Staff is Fixed (e.g. Dutch)
+  if (!isAuto1 && isAuto2) {
+    // Staff (lang1) is Fixed (e.g. Dutch), Guest (lang2) is Auto
     instruction = `
-    The conversation is between a Staff member (always speaking ${lang2}) and a Visitor (language to be detected).
+    The conversation is between a Staff member (always speaking ${lang1}) and a Guest (language to be detected).
     
     RULES:
-    1. **Double Interaction Mode**: You are calculating translations for TWO distinct speakers.
-    2. **Staff (Dutch Flemish)**: When you hear Dutch/Flemish, assume it is the Staff. Translate it IMMMEDIATELY to the Visitor's language (last detected language, or English if unknown).
-    3. **Visitor (Detected Language)**: When you hear a non-Dutch language, assume it is the Visitor. Translate it IMMEDIATELY to Dutch (Flemish).
-    4. **Context**: Keep track of the Visitor's language. If the Staff speaks first, wait for the Visitor or default to English. If the Visitor speaks, lock on to that language for the Staff's translation.
+    1. **Double Interaction Mode**: You are translating for TWO distinct speakers.
+    2. **Staff (${lang1})**: When you hear ${lang1}, assume it is the Staff. Translate it IMMMEDIATELY to the Guest's language (the language they last spoke).
+       - *Crucial*: If the Guest hasn't spoken yet, or their language is not yet detected, default to English for the Staff's translation.
+    3. **Guest (Auto Detect)**: When you hear any language that is NOT ${lang1}, assume it is the Guest. Translate it IMMEDIATELY to ${lang1}.
+    4. **Memory**: Lock on to the language detected from the Guest. Use this specific language as the target for all subsequent translations of the Staff's ${lang1} speech.
+    
+    Example Flow (Staff speaks Dutch):
+    - Guest speaks Filipino -> You translate to Dutch.
+    - Staff speaks Dutch -> You translate to Filipino.
+    - Guest speaks Spanish -> You translate to Dutch.
+    - Staff speaks Dutch -> You translate to Spanish.
     `;
-  } else if (!isAuto1 && isAuto2) {
-    // Staff is Auto (unlikely based on requirements but possible), Visitor is Fixed
+  } else if (isAuto1 && !isAuto2) {
+    // Guest (lang2) is Fixed, Staff (lang1) is Auto
     instruction = `
-    The conversation is between a Visitor (always speaking ${lang1}) and a Staff member (language to be detected).
+    The conversation is between a Guest (always speaking ${lang2}) and a Staff member (language to be detected).
     
     RULES:
-    1. If you hear ${lang1} (Visitor), translate it to the language the Staff most recently spoke.
-    2. If you hear any other language (Staff), translate it to ${lang1}.
+    1. If you hear ${lang2} (Guest), translate it to the language the Staff most recently spoke (or English if unknown).
+    2. If you hear any other language (Staff), translate it to ${lang2}.
     `;
   } else if (isAuto1 && isAuto2) {
+    // Both Auto
     instruction = `Detect the language of the audio and translate it to English if it is not English. If it is English, translate it to the other detected language from context.`;
   } else {
     // Both fixed
@@ -84,12 +91,12 @@ export const useSettings = create<{
   setLanguage2: (language: string) => void;
   setTopic: (topic: string) => void;
 }>((set, get) => ({
-  systemPrompt: generateSystemPrompt('auto', 'Dutch (Flemish)', ''),
+  systemPrompt: generateSystemPrompt('Dutch (Flemish)', 'auto', ''),
   model: DEFAULT_LIVE_API_MODEL,
   voice1: DEFAULT_VOICE_STAFF,
   voice2: DEFAULT_VOICE_GUEST,
-  language1: 'auto',
-  language2: 'Dutch (Flemish)',
+  language1: 'Dutch (Flemish)',
+  language2: 'auto',
   topic: '',
   setSystemPrompt: prompt => set({ systemPrompt: prompt }),
   setModel: model => set({ model }),
