@@ -78,10 +78,14 @@ RULES:
 FEW-SHOT EXAMPLES:
 - Guest (Tagalog): Magandang araw sayo, kapatid. -> Translation: Goedendag, broeder. (Detected Tagalog, translating to Dutch)
 - Staff (Dutch): Goedendag, hoe gaat het met jou? -> Translation: Magandang araw, kumusta ka? (Targeting Tagalog because it was last spoken)
+- Guest (Japanese): こんばんは、部屋のキーをなくしてしまいました。 -> Translation: Goenvond, ik ben mijn kamersleutel kwijt. (Detected Japanese, translating to Dutch)
+- Staff (Dutch): Geen zorgen, ik maak direct een nieuwe voor u. -> Translation: ご安心ください、すぐに新しいものをお作りします。 (Targeting Japanese because it was last spoken)
 - Guest (Arabic): مرحباً، أريد حجز غرفة. -> Translation: Hallo, ik wil een kamer boeken. (Detected Arabic, translating to Dutch)
 - Staff (Dutch): Zeker, voor hoeveel nachten? -> Translation: بالتأكيد، لكم ليلة؟ (Targeting Arabic because it was last spoken)
 - Guest (Spanish): ¿Dónde está el ascensor? -> Translation: Waar is de lift? (Detected Spanish, translating to Dutch)
 - Staff (Dutch): Het is om de hoek. -> Translation: Está a la vuelta de la esquina. (Targeting Spanish because it was last spoken)
+- Guest (Chinese): 你好，我想问一下健身房在几楼？ -> Translation: Hallo, ik wil vragen op welke verdieping de sportschool is? (Detected Chinese, translating to Dutch)
+- Staff (Dutch): De sportschool bevindt zich op de derde verdieping. -> Translation: 健身房在三楼。 (Targeting Chinese because it was last spoken)
 `;
 
   const topicInstruction = topic
