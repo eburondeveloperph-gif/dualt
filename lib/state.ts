@@ -155,6 +155,7 @@ guestLanguage: string;
 staffLanguage: string;
 topic: string;
 lastGuestLanguage: string;
+apiKey: string;
 setSystemPrompt: (prompt: string) => void;
 setModel: (model: string) => void;
 setVoice1: (voice: string) => void;
@@ -163,6 +164,7 @@ setGuestLanguage: (language: string) => void;
 setStaffLanguage: (language: string) => void;
 setTopic: (topic: string) => void;
 setLastGuestLanguage: (language: string) => void;
+setApiKey: (key: string) => void;
 }>((set, get) => ({
 systemPrompt: generateSystemPrompt('auto', 'Dutch (Flemish)', '', 'none'),
 model: DEFAULT_LIVE_API_MODEL,
@@ -172,6 +174,7 @@ guestLanguage: 'auto',
 staffLanguage: 'Dutch (Flemish)',
 topic: '',
 lastGuestLanguage: 'none',
+apiKey: import.meta.env.VITE_GEMINI_API_KEY || '',
 setSystemPrompt: prompt => set({ systemPrompt: prompt }),
 setModel: model => set({ model }),
 setVoice1: voice => set({ voice1: voice }),
@@ -188,10 +191,8 @@ setTopic: topic => set({
 topic: topic,
 systemPrompt: generateSystemPrompt(get().guestLanguage, get().staffLanguage, topic, get().lastGuestLanguage)
 }),
-setLastGuestLanguage: language => set({
-lastGuestLanguage: language,
-systemPrompt: generateSystemPrompt(get().guestLanguage, get().staffLanguage, get().topic, language)
-}),
+setLastGuestLanguage: language => set({ lastGuestLanguage: language }),
+setApiKey: key => set({ apiKey: key }),
 }));
 
 /**

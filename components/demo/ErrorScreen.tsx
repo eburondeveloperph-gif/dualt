@@ -5,15 +5,19 @@
 import { useLiveAPIContext } from '../../contexts/LiveAPIContext';
 import React, { useEffect, useState } from 'react';
 
+import { useSettings } from '../../lib/state';
+
 export interface ExtendedErrorType {
-  code?: number;
+  code?: string;
   message?: string;
   status?: string;
 }
 
-export default function ErrorScreen() {
+export default function ErrorScreen({ forceMissingKey = false }: { forceMissingKey?: boolean }) {
   const { client } = useLiveAPIContext();
+  const { setApiKey } = useSettings();
   const [error, setError] = useState<{ message?: string } | null>(null);
+  const [tempKey, setTempKey] = useState('');
 
   useEffect(() => {
     function onError(error: ErrorEvent) {
@@ -40,51 +44,65 @@ export default function ErrorScreen() {
     tryAgainOption = false;
   }
 
+  if (forceMissingKey) {
+    return (
+      <div className="error-screen eburon-standard">
+        <div className="eburon-glow"></div>
+        <div className="eburon-content">
+          <div className="eburon-badge">EBRN_KEY_MISSING</div>
+          <h1 className="eburon-title">API Key Missing</h1>
+          <p className="eburon-desc">
+            To start using Dual Translator, please provide your Gemini API key.
+            The key is stored locally in your session.
+          </p>
+          
+          <div className="eburon-input-group">
+            <input 
+              type="password" 
+              placeholder="Paste your API key here..." 
+              value={tempKey}
+              onChange={(e) => setTempKey(e.target.value)}
+              className="eburon-input"
+            />
+            <button 
+              className="eburon-submit"
+              onClick={() => setApiKey(tempKey)}
+              disabled={!tempKey.trim()}
+            >
+              Enable Access
+            </button>
+          </div>
+          
+          <div className="eburon-footer">
+            Need a key? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer noopener">Get one from Google AI Studio</a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!error) {
     return <div style={{ display: 'none' }} />;
   }
 
   return (
-    <div className="error-screen">
-      <div
-        style={{
-          fontSize: 48,
-        }}
-      >
-        💔
+    <div className="error-screen eburon-standard generic">
+      <div className="eburon-content">
+        <div className="eburon-badge">EBRN_INTERNAL</div>
+        <div className="eburon-icon">💔</div>
+        <div className="eburon-desc">{errorMessage}</div>
+        {tryAgainOption ? (
+          <button
+            className="eburon-submit secondary"
+            onClick={() => setError(null)}
+          >
+            Dismiss
+          </button>
+        ) : null}
+        {rawMessage ? (
+          <pre className="eburon-raw-log">{rawMessage}</pre>
+        ) : null}
       </div>
-      <div
-        className="error-message-container"
-        style={{
-          fontSize: 22,
-          lineHeight: 1.2,
-          opacity: 0.5,
-        }}
-      >
-        {errorMessage}
-      </div>
-      {tryAgainOption ? (
-        <button
-          className="close-button"
-          onClick={() => {
-            setError(null);
-          }}
-        >
-          Close
-        </button>
-      ) : null}
-      {rawMessage ? (
-        <div
-          className="error-raw-message-container"
-          style={{
-            fontSize: 15,
-            lineHeight: 1.2,
-            opacity: 0.4,
-          }}
-        >
-          {rawMessage}
-        </div>
-      ) : null}
     </div>
   );
 }

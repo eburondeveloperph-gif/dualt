@@ -30,21 +30,11 @@ import { LiveAPIProvider } from './contexts/LiveAPIContext';
 import { useAuth, updateUserSettings } from './lib/auth';
 import { useSettings } from './lib/state';
 
-const API_KEY =
-  import.meta.env.VITE_GEMINI_API_KEY ||
-  import.meta.env.VITE_API_KEY ||
-  process.env.API_KEY ||
-  process.env.GEMINI_API_KEY ||
-  '';
-
-const hasApiKey = typeof API_KEY === 'string' && API_KEY.trim().length > 0;
-
-/**
- * Main application component that provides a streaming interface for Live API.
- * Manages video streaming state and provides controls for webcam/screen capture.
- */
 function App() {
   const { user } = useAuth();
+  const { apiKey } = useSettings();
+
+  const hasApiKey = typeof apiKey === 'string' && apiKey.trim().length > 0;
 
   useEffect(() => {
     if (!user) return;
@@ -71,12 +61,7 @@ function App() {
   if (!hasApiKey) {
     return (
       <div className="App">
-        <div className="error-screen">
-          <div className="error-message-container">
-            Missing API key. Set <code>VITE_GEMINI_API_KEY</code> in your environment (for Vercel:
-            Project Settings - Environment Variables), then redeploy.
-          </div>
-        </div>
+        <ErrorScreen forceMissingKey />
       </div>
     );
   }
@@ -87,7 +72,7 @@ function App() {
 
   return (
     <div className="App">
-      <LiveAPIProvider apiKey={API_KEY}>
+      <LiveAPIProvider apiKey={apiKey}>
         <ErrorScreen />
         <Header />
         <Sidebar />
