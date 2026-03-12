@@ -1,0 +1,266 @@
+[
+  {
+    "session": 1,
+    "speaker": "Guest Speaking",
+    "language": "fr",
+    "text": "Bonjour, madame. Depuis hier, j’ai mal à la gorge, je tousse un peu, et je me sens fatigué. Je voudrais savoir si vous avez quelque chose pour ça."
+  },
+  {
+    "session": 1,
+    "speaker": "Translator Agent",
+    "language": "nl-BE",
+    "text": "Goeiedag mevrouw. Sinds gisteren heb ik keelpijn, ik hoest een beetje, en ik voel me moe. Ik zou graag willen weten of jullie daar iets voor hebben."
+  },
+  {
+    "session": 1,
+    "speaker": "Staff Speaking",
+    "language": "nl-BE",
+    "text": "Goeiedag. Ja, daarvoor hebben we verschillende middelen. Heeft u ook koorts, of vooral keelpijn en hoest?"
+  },
+  {
+    "session": 1,
+    "speaker": "Translator Agent",
+    "language": "fr",
+    "text": "Bonjour. Oui, nous avons plusieurs produits pour cela. Avez-vous aussi de la fièvre, ou surtout mal à la gorge et de la toux?"
+  },
+  {
+    "session": 1,
+    "speaker": "Guest Speaking",
+    "language": "fr",
+    "text": "Je n’ai pas de forte fièvre, mais je sens que ma gorge est irritée, surtout le soir. Et la toux est plus sèche que grasse."
+  },
+  {
+    "session": 1,
+    "speaker": "Translator Agent",
+    "language": "nl-BE",
+    "text": "Ik heb geen hoge koorts, maar mijn keel voelt geïrriteerd aan, vooral ’s avonds. En de hoest is eerder droog dan vastzittend."
+  },
+  {
+    "session": 1,
+    "speaker": "Staff Speaking",
+    "language": "nl-BE",
+    "text": "In dat geval kan ik u keeltabletten aanraden en ook een siroop tegen droge hoest. Drinkt u best ook voldoende water en warme dranken."
+  },
+  {
+    "session": 1,
+    "speaker": "Translator Agent",
+    "language": "fr",
+    "text": "Dans ce cas, je peux vous recommander des pastilles pour la gorge et aussi un sirop contre la toux sèche. Il vaut mieux aussi boire suffisamment d’eau et des boissons chaudes."
+  },
+  {
+    "session": 1,
+    "speaker": "Guest Speaking",
+    "language": "fr",
+    "text": "D’accord. Est-ce que ce sirop donne de la somnolence? Je dois encore conduire ce soir."
+  },
+  {
+    "session": 1,
+    "speaker": "Translator Agent",
+    "language": "nl-BE",
+    "text": "Goed. Maakt die siroop slaperig? Ik moet vanavond nog rijden."
+  },
+  {
+    "session": 1,
+    "speaker": "Staff Speaking",
+    "language": "nl-BE",
+    "text": "Deze siroop maakt normaal niet slaperig, maar ik raad altijd aan om de bijsluiter even te lezen. Als u liever zeker bent, hebben we ook een mildere variant."
+  },
+  {
+    "session": 1,
+    "speaker": "Translator Agent",
+    "language": "fr",
+    "text": "Ce sirop ne provoque normalement pas de somnolence, mais je conseille toujours de lire la notice. Si vous préférez être plus prudent, nous avons aussi une version plus légère."
+  },
+  {
+    "session": 2,
+    "speaker": "Guest Speaking",
+    "language": "de",
+    "text": "Guten Tag. Ich habe seit einigen Tagen Allergiesymptome. Ich niese oft, meine Augen jucken, und morgens ist es besonders schlimm."
+  },
+  {
+    "session": 2,
+    "speaker": "Translator Agent",
+    "language": "nl-BE",
+    "text": "Goeiedag. Ik heb sinds enkele dagen allergiesymptomen. Ik nies vaak, mijn ogen jeuken, en ’s morgens is het vooral erg."
+  },
+  {
+    "session": 2,
+    "speaker": "Staff Speaking",
+    "language": "nl-BE",
+    "text": "Goeiedag. Dat klinkt als een seizoensallergie. Heeft u ook last van een verstopte neus of ademhalingsproblemen?"
+  },
+  {
+    "session": 2,
+    "speaker": "Translator Agent",
+    "language": "de",
+    "text": "Guten Tag. Das klingt nach einer saisonalen Allergie. Haben Sie auch eine verstopfte Nase oder Atemprobleme?"
+  },
+  {
+    "session": 2,
+    "speaker": "Guest Speaking",
+    "language": "de",
+    "text": "Meine Nase ist oft verstopft, aber Atemprobleme habe ich nicht. Ich möchte etwas, das ich tagsüber nehmen kann, ohne müde zu werden."
+  },
+  {
+    "session": 2,
+    "speaker": "Translator Agent",
+    "language": "nl-BE",
+    "text": "Mijn neus is vaak verstopt, maar ik heb geen ademhalingsproblemen. Ik wil graag iets dat ik overdag kan nemen zonder moe te worden."
+  },
+  {
+    "session": 2,
+    "speaker": "Staff Speaking",
+    "language": "nl-BE",
+    "text": "Dan raad ik u een antihistaminicum aan dat meestal weinig slaperigheid veroorzaakt. Voor de neus kan ik ook een neusspray aanbevelen."
+  },
+  {
+    "session": 2,
+    "speaker": "Translator Agent",
+    "language": "de",
+    "text": "Dann empfehle ich Ihnen ein Antihistaminikum, das normalerweise nur wenig Müdigkeit verursacht. Für die Nase kann ich auch ein Nasenspray empfehlen."
+  },
+  {
+    "session": 3,
+    "speaker": "Guest Speaking",
+    "language": "en",
+    "text": "Hello. I’m looking for something for stomach acid. After meals I often feel a burning sensation, especially at night."
+  },
+  {
+    "session": 3,
+    "speaker": "Translator Agent",
+    "language": "nl-BE",
+    "text": "Hallo. Ik zoek iets tegen maagzuur. Na de maaltijden voel ik vaak een branderig gevoel, vooral ’s nachts."
+  },
+  {
+    "session": 3,
+    "speaker": "Staff Speaking",
+    "language": "nl-BE",
+    "text": "Hallo. Hoe lang hebt u daar al last van? En is het vooral na zware maaltijden of bijna elke keer dat u eet?"
+  },
+  {
+    "session": 3,
+    "speaker": "Translator Agent",
+    "language": "en",
+    "text": "Hello. How long have you been dealing with that? And is it mostly after heavy meals or almost every time you eat?"
+  },
+  {
+    "session": 3,
+    "speaker": "Guest Speaking",
+    "language": "en",
+    "text": "For about a week now. It gets worse after spicy food, coffee, and when I lie down too soon after eating."
+  },
+  {
+    "session": 3,
+    "speaker": "Translator Agent",
+    "language": "nl-BE",
+    "text": "Sinds ongeveer een week. Het wordt erger na pikant eten, koffie, en wanneer ik te snel ga liggen na het eten."
+  },
+  {
+    "session": 3,
+    "speaker": "Staff Speaking",
+    "language": "nl-BE",
+    "text": "Dat lijkt op maagzuur of reflux. We hebben tabletten die het zuur neutraliseren en ook medicatie die de aanmaak van zuur vermindert."
+  },
+  {
+    "session": 3,
+    "speaker": "Translator Agent",
+    "language": "en",
+    "text": "That sounds like stomach acid or reflux. We have tablets that neutralize the acid and also medication that reduces acid production."
+  },
+  {
+    "session": 4,
+    "speaker": "Guest Speaking",
+    "language": "ar",
+    "text": "مرحبًا. ابني عنده حرارة خفيفة منذ هذا الصباح، وأريد دواءً مناسبًا للأطفال."
+  },
+  {
+    "session": 4,
+    "speaker": "Translator Agent",
+    "language": "nl-BE",
+    "text": "Hallo. Mijn zoon heeft sinds deze ochtend lichte koorts, en ik wil graag medicatie die geschikt is voor kinderen."
+  },
+  {
+    "session": 4,
+    "speaker": "Staff Speaking",
+    "language": "nl-BE",
+    "text": "Hallo. Hoe oud is uw zoon, en kent u ongeveer zijn gewicht? Dat is belangrijk voor de juiste dosis."
+  },
+  {
+    "session": 4,
+    "speaker": "Translator Agent",
+    "language": "ar",
+    "text": "مرحبًا. كم عمر ابنك، وهل تعرفين وزنه تقريبًا؟ هذا مهم من أجل الجرعة الصحيحة."
+  },
+  {
+    "session": 4,
+    "speaker": "Guest Speaking",
+    "language": "ar",
+    "text": "عمره خمس سنوات، ويزن تقريبًا عشرين كيلوغرامًا."
+  },
+  {
+    "session": 4,
+    "speaker": "Translator Agent",
+    "language": "nl-BE",
+    "text": "Hij is vijf jaar oud en weegt ongeveer twintig kilogram."
+  },
+  {
+    "session": 4,
+    "speaker": "Staff Speaking",
+    "language": "nl-BE",
+    "text": "Goed. Dan kan ik u een kindersiroop tegen koorts aanraden. Die is geschikt voor zijn leeftijd en gewicht."
+  },
+  {
+    "session": 4,
+    "speaker": "Translator Agent",
+    "language": "ar",
+    "text": "حسنًا. يمكنني أن أوصي لك بشراب للأطفال ضد الحمى. وهو مناسب لعمره ووزنه."
+  },
+  {
+    "session": 5,
+    "speaker": "Guest Speaking",
+    "language": "tr",
+    "text": "Merhaba. Son birkaç gündür sırt ağrım var. Özellikle işten sonra daha kötü oluyor. Kas gevşetici ya da ağrı kesici almak istiyorum."
+  },
+  {
+    "session": 5,
+    "speaker": "Translator Agent",
+    "language": "nl-BE",
+    "text": "Hallo. Sinds enkele dagen heb ik rugpijn. Vooral na het werk wordt het erger. Ik wil graag een spierontspanner of een pijnstiller nemen."
+  },
+  {
+    "session": 5,
+    "speaker": "Staff Speaking",
+    "language": "nl-BE",
+    "text": "Hallo. Is de pijn plots begonnen, of is het geleidelijk erger geworden? En straalt de pijn uit naar uw benen?"
+  },
+  {
+    "session": 5,
+    "speaker": "Translator Agent",
+    "language": "tr",
+    "text": "Merhaba. Ağrı aniden mi başladı, yoksa yavaş yavaş mı kötüleşti? Ayrıca ağrı bacaklarınıza vuruyor mu?"
+  },
+  {
+    "session": 5,
+    "speaker": "Guest Speaking",
+    "language": "tr",
+    "text": "Yavaş yavaş başladı. Bacaklarıma vurmuyor, ama belimin alt kısmı çok sert hissediyor."
+  },
+  {
+    "session": 5,
+    "speaker": "Translator Agent",
+    "language": "nl-BE",
+    "text": "Het is geleidelijk begonnen. Het straalt niet uit naar mijn benen, maar mijn onderrug voelt erg stijf aan."
+  },
+  {
+    "session": 5,
+    "speaker": "Staff Speaking",
+    "language": "nl-BE",
+    "text": "Dat klinkt eerder als een gespannen spier of overbelasting. We hebben een ontstekingsremmende gel en ook pijnstillers in tabletvorm."
+  },
+  {
+    "session": 5,
+    "speaker": "Translator Agent",
+    "language": "tr",
+    "text": "Bu daha çok kas gerginliği ya da aşırı zorlanma gibi görünüyor. Bizde iltihap önleyici bir jel ve tablet şeklinde ağrı kesiciler var."
+  }
+]
