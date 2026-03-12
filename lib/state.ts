@@ -84,12 +84,24 @@ RULES:
 `;
   }
 
+  const samples = `
+FEW-SHOT EXAMPLES:
+- Guest (Arabic): مرحباً، أريد حجز غرفة. -> Translation: Hallo, ik wil een kamer boeken. (Detected Arabic)
+- Staff (Dutch): Zeker, voor hoeveel nachten? -> Translation: بالتأكيد، لكم ليلة؟ (Targeting Arabic)
+- Guest (Filipino): Mayroon din po ba kayong Wi-Fi? -> Translation: Heeft u ook Wi-Fi? (Detected Filipino)
+- Staff (Dutch): Zeker, het wachtwoord is 'GuestLogin2024'. -> Translation: Siyempre, ang password ay 'GuestLogin2024'. (Targeting Filipino)
+- Guest (Spanish): ¿Dónde está el ascensor? -> Translation: Waar is de lift? (Detected Spanish)
+- Staff (Dutch): Het is om de hoek. -> Translation: Está a la vuelta de la esquina. (Targeting Spanish)
+`;
+
   const topicInstruction = topic
     ? `The conversation is about ${topic}. Use precise terminology and preserve the intended context.`
     : '';
 
   return `You are an expert, seamless voice interpreter.
 ${instruction}
+
+${samples}
 
 CRITICAL INSTRUCTIONS:
 

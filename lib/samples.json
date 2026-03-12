@@ -1,0 +1,151 @@
+{
+  "description": "Multi-turn translation samples for voice interpreter. Staff language: Dutch. Guest language: Dynamic.",
+  "rules_followed": [
+    "Always translate guest to Dutch.",
+    "Always translate Dutch (staff) back to the latest detected guest language.",
+    "No English default if another language has been spoken.",
+    "If no guest language detected yet, keep Dutch as Dutch."
+  ],
+  "turns": [
+    {
+      "turn": 1,
+      "speaker": "guest",
+      "detected_language": "Arabic",
+      "original": "مرحباً، كيف حالك؟ أريد أن أسأل عن موعد تسجيل الوصول.",
+      "translation": "Hallo, hoe gaat het? Ik wil informeren naar de inchecktijd."
+    },
+    {
+      "turn": 2,
+      "speaker": "staff",
+      "original": "Goedemiddag! U kunt inchecken vanaf 14:00 uur.",
+      "target_language": "Arabic",
+      "translation": "مساء الخير! يمكنك تسجيل الوصول من الساعة 2:00 ظهراً."
+    },
+    {
+      "turn": 3,
+      "speaker": "guest",
+      "detected_language": "Arabic",
+      "original": "هل هناك إفطار متضمن؟",
+      "translation": "Is er ontbijt inbegrepen?"
+    },
+    {
+      "turn": 4,
+      "speaker": "staff",
+      "original": "Ja, het ontbijt wordt geserveerd van 7:00 tot 10:00.",
+      "target_language": "Arabic",
+      "translation": "نعم، يتم تقديم الإفطار من الساعة 7:00 حتى الساعة 10:00."
+    },
+    {
+      "turn": 5,
+      "speaker": "guest",
+      "detected_language": "Filipino",
+      "original": "Salamat po. Mayroon din po ba kayong Wi-Fi?",
+      "translation": "Bedankt. Heeft u ook Wi-Fi?"
+    },
+    {
+      "turn": 6,
+      "speaker": "staff",
+      "original": "Zeker, het wachtwoord is 'GuestLogin2024'.",
+      "target_language": "Filipino",
+      "translation": "Siyempre, ang password ay 'GuestLogin2024'."
+    },
+    {
+      "turn": 7,
+      "speaker": "guest",
+      "detected_language": "Filipino",
+      "original": "Sige po, aakyat na ako sa kwarto.",
+      "translation": "Oké, ik ga nu naar de kamer."
+    },
+    {
+      "turn": 8,
+      "speaker": "staff",
+      "original": "Wenst u hulp met uw bagage?",
+      "target_language": "Filipino",
+      "translation": "Kailangan niyo po ba ng tulong sa inyong mga bagahe?"
+    },
+    {
+      "turn": 9,
+      "speaker": "guest",
+      "detected_language": "Spanish",
+      "original": "Hola, ¿me puede decir dónde está el ascensor?",
+      "translation": "Hallo, kunt u mij vertellen waar de lift is?"
+    },
+    {
+      "turn": 10,
+      "speaker": "staff",
+      "original": "Het is om de hoek aan de linkerkant.",
+      "target_language": "Spanish",
+      "translation": "Está a la vuelta de la esquina a la izquierda."
+    },
+    {
+      "turn": 11,
+      "speaker": "guest",
+      "detected_language": "Spanish",
+      "original": "Muchas gracias, muy amable.",
+      "translation": "Heel erg bedankt, heel vriendelijk."
+    },
+    {
+      "turn": 12,
+      "speaker": "staff",
+      "original": "Graag gedaan! Prettig verblijf.",
+      "target_language": "Spanish",
+      "translation": "Graag gedaan! Prettig verblijf."
+    },
+    {
+      "turn": 13,
+      "speaker": "guest",
+      "detected_language": "Dutch",
+      "original": "Ik heb ook nog een vraag over het restaurant.",
+      "translation": "Ik heb ook nog een vraag over het restaurant."
+    },
+    {
+      "turn": 14,
+      "speaker": "staff",
+      "original": "Natuurlijk, wat wilt u weten over het restaurant?",
+      "target_language": "Dutch",
+      "translation": "Natuurlijk, wat wilt u weten over het restaurant?"
+    },
+    {
+      "turn": 15,
+      "speaker": "guest",
+      "detected_language": "Arabic",
+      "original": "أي مطعم تنصح به لتناول العشاء؟",
+      "translation": "Welk restaurant raadt u aan voor het diner?"
+    },
+    {
+      "turn": 16,
+      "speaker": "staff",
+      "original": "Ik raad het visrestaurant aan het water aan.",
+      "target_language": "Arabic",
+      "translation": "أوصي بمطعم المأكولات البحرية على الواجهة البحرية."
+    },
+    {
+      "turn": 17,
+      "speaker": "guest",
+      "detected_language": "English",
+      "original": "Is it within walking distance?",
+      "translation": "Is het op loopafstand?"
+    },
+    {
+      "turn": 18,
+      "speaker": "staff",
+      "original": "Ja, het is ongeveer 5 minuten lopen.",
+      "target_language": "English",
+      "translation": "Yes, it is about a 5-minute walk."
+    },
+    {
+      "turn": 19,
+      "speaker": "guest",
+      "detected_language": "Filipino",
+      "original": "Pwede po ba akong magpa-book ng taxi para bukas?",
+      "translation": "Kan ik een taxi boeken voor morgen?"
+    },
+    {
+      "turn": 20,
+      "speaker": "staff",
+      "original": "Zal ik dat nu voor u regelen?",
+      "target_language": "Filipino",
+      "translation": "I-aayos ko na ba iyon para sa iyo ngayon?"
+    }
+  ]
+}
