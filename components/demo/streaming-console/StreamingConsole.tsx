@@ -18,13 +18,77 @@ import {
 import { useHistoryStore } from '../../../lib/history';
 import { useAuth, updateUserConversations, fetchUserConversations } from '../../../lib/auth';
 
+const AUTO_DETECT_LABEL = 'Auto Detect';
+
+const findLastUserTurnIndex = (turns: ConversationTurn[]) => {
+  for (let i = turns.length - 1; i >= 0; i--) {
+    if (turns[i].role === 'user') {
+      return i;
+    }
+  }
+  return null;
+};
+
+const resolveSourceTurn = (
+  turns: ConversationTurn[],
+  activeUserTurnIndex: number | null,
+) => {
+  if (
+    activeUserTurnIndex !== null &&
+    activeUserTurnIndex >= 0 &&
+    activeUserTurnIndex < turns.length &&
+    turns[activeUserTurnIndex]?.role === 'user'
+  ) {
+    return turns[activeUserTurnIndex];
+  }
+
+  const lastUserTurnIndex = findLastUserTurnIndex(turns);
+  return lastUserTurnIndex !== null ? turns[lastUserTurnIndex] : undefined;
+};
+
+const buildAgentTurnMetadata = (
+  sourceTurn: ConversationTurn | undefined,
+  guestLanguage: string,
+  staffLanguage: string,
+  lastGuestLanguage: string,
+) => {
+  const sourceLooksLikeGuest =
+    sourceTurn?.detectedSpeaker === 'Guest' ||
+    Boolean(
+      sourceTurn?.detectedLanguage &&
+      sourceTurn.detectedLanguage !== AUTO_DETECT_LABEL &&
+      sourceTurn.detectedLanguage !== staffLanguage,
+    );
+
+  const detectedSpeaker: ConversationTurn['detectedSpeaker'] = sourceLooksLikeGuest
+    ? 'Guest'
+    : 'Staff';
+
+  const detectedLanguage =
+    detectedSpeaker === 'Guest'
+      ? staffLanguage
+      : guestLanguage === 'auto'
+        ? lastGuestLanguage !== 'none'
+          ? lastGuestLanguage
+          : AUTO_DETECT_LABEL
+        : guestLanguage;
+
+  return {
+    detectedSpeaker,
+    detectedLanguage,
+  };
+};
+
 export default function StreamingConsole() {
   const { client, setConfig } = useLiveAPIContext();
-  const { systemPrompt, voice1, guestLanguage, staffLanguage, lastGuestLanguage, setLastGuestLanguage } = useSettings();
+  const { systemPrompt, voice1 } = useSettings();
   const { addHistoryItem } = useHistoryStore();
   const { user } = useAuth();
 
   const turns = useLogStore(state => state.turns);
+  const activeUserTurnIndexRef = useRef<number | null>(null);
+  const activeAgentTurnIndexRef = useRef<number | null>(null);
+  const agentTurnHasContentRef = useRef(false);
 
   // Fetch history on mount
   useEffect(() => {
@@ -66,52 +130,78 @@ export default function StreamingConsole() {
   }, [setConfig, systemPrompt, voice1]);
 
   useEffect(() => {
-    const { addTurn, updateLastTurn } = useLogStore.getState();
+    const createAgentTurn = (
+      text: string,
+      isFinal: boolean,
+      groundingChunks?: ConversationTurn['groundingChunks'],
+      preferContentText: boolean = false,
+    ) => {
+      const { guestLanguage, staffLanguage, lastGuestLanguage } = useSettings.getState();
+      const { turns, addTurn } = useLogStore.getState();
+      const sourceTurn = resolveSourceTurn(turns, activeUserTurnIndexRef.current);
+      const metadata = buildAgentTurnMetadata(
+        sourceTurn,
+        guestLanguage,
+        staffLanguage,
+        lastGuestLanguage,
+      );
+
+      addTurn({
+        role: 'agent',
+        text,
+        isFinal,
+        groundingChunks,
+        ...metadata,
+      });
+
+      activeAgentTurnIndexRef.current = useLogStore.getState().turns.length - 1;
+      agentTurnHasContentRef.current = preferContentText && Boolean(text);
+    };
 
     const handleInputTranscription = (text: string, isFinal: boolean) => {
-      const turns = useLogStore.getState().turns;
-      const last = turns[turns.length - 1];
-      
-      // Heuristic for Input: If it contains Dutch-specific characters or common Dutch words, it's likely Staff.
-      // Otherwise, we assume Guest until the model says otherwise.
-      const isDutch = /^[a-zA-Z\s]+$/.test(text) && (
-        text.toLowerCase().includes('ben') || 
-        text.toLowerCase().includes('jij') || 
-        text.toLowerCase().includes('een') || 
-        text.toLowerCase().includes('hoe') ||
-        text.toLowerCase().includes('wat')
-      );
-      const speaker = isDutch ? 'Staff' : 'Guest';
+      const { turns, addTurn, updateTurnAt } = useLogStore.getState();
+      const activeUserTurnIndex = activeUserTurnIndexRef.current;
+      const activeUserTurn =
+        activeUserTurnIndex !== null ? turns[activeUserTurnIndex] : undefined;
 
-      if (last && last.role === 'user' && !last.isFinal) {
-        updateLastTurn({
-          text: last.text + text,
+      if (activeUserTurn?.role === 'user' && !activeUserTurn.isFinal) {
+        updateTurnAt(activeUserTurnIndex!, {
+          text: activeUserTurn.text + text,
           isFinal,
-          detectedSpeaker: speaker,
-          detectedLanguage: isDutch ? staffLanguage : (guestLanguage === 'auto' ? lastGuestLanguage : guestLanguage)
         });
-      } else {
-        addTurn({ 
-          role: 'user', 
-          text, 
-          isFinal,
-          detectedSpeaker: speaker,
-          detectedLanguage: isDutch ? staffLanguage : (guestLanguage === 'auto' ? lastGuestLanguage : guestLanguage)
-        });
+        return;
       }
+
+      addTurn({
+        role: 'user',
+        text,
+        isFinal,
+      });
+
+      activeUserTurnIndexRef.current = useLogStore.getState().turns.length - 1;
+      activeAgentTurnIndexRef.current = null;
+      agentTurnHasContentRef.current = false;
     };
 
     const handleOutputTranscription = (text: string, isFinal: boolean) => {
-      const turns = useLogStore.getState().turns;
-      const last = turns[turns.length - 1];
-      if (last && last.role === 'agent' && !last.isFinal) {
-        updateLastTurn({
-          text: last.text + text,
+      if (agentTurnHasContentRef.current) {
+        return;
+      }
+
+      const { turns, updateTurnAt } = useLogStore.getState();
+      const activeAgentTurnIndex = activeAgentTurnIndexRef.current;
+      const activeAgentTurn =
+        activeAgentTurnIndex !== null ? turns[activeAgentTurnIndex] : undefined;
+
+      if (activeAgentTurn?.role === 'agent' && !activeAgentTurn.isFinal) {
+        updateTurnAt(activeAgentTurnIndex!, {
+          text: activeAgentTurn.text + text,
           isFinal,
         });
-      } else {
-        addTurn({ role: 'agent', text, isFinal });
+        return;
       }
+
+      createAgentTurn(text, isFinal);
     };
 
     // FIX: The 'content' event provides a single LiveServerContent object.
@@ -125,95 +215,123 @@ export default function StreamingConsole() {
 
       if (!text && !groundingChunks) return;
 
-      const { turns, addTurn, updateLastTurn } = useLogStore.getState();
-      const last = turns[turns.length - 1];
+      const { guestLanguage, staffLanguage, lastGuestLanguage } = useSettings.getState();
+      const { turns, updateTurnAt } = useLogStore.getState();
+      const sourceTurn = resolveSourceTurn(turns, activeUserTurnIndexRef.current);
+      const metadata = buildAgentTurnMetadata(
+        sourceTurn,
+        guestLanguage,
+        staffLanguage,
+        lastGuestLanguage,
+      );
+      const activeUserTurnIndex = activeUserTurnIndexRef.current;
+      if (
+        activeUserTurnIndex !== null &&
+        sourceTurn?.role === 'user' &&
+        !sourceTurn.detectedSpeaker &&
+        metadata.detectedSpeaker === 'Staff'
+      ) {
+        updateTurnAt(activeUserTurnIndex, {
+          detectedSpeaker: 'Staff',
+          detectedLanguage: staffLanguage,
+        });
+      }
+      const activeAgentTurnIndex = activeAgentTurnIndexRef.current;
+      const activeAgentTurn =
+        activeAgentTurnIndex !== null ? turns[activeAgentTurnIndex] : undefined;
 
-      // Heuristic for Output:
-      // If the model output is Dutch, it's a translation for the Staff (Guest was original speaker).
-      // If the model output is anything else, it's a translation for the Guest (Staff was original speaker).
-      const outputIsDutch = (text.toLowerCase().includes('is') || text.toLowerCase().includes('het')) && !/[\u0600-\u06FF]/.test(text);
-      const speakerRole = outputIsDutch ? 'Guest' : 'Staff'; 
-      const targetLang = outputIsDutch ? staffLanguage : (guestLanguage === 'auto' ? lastGuestLanguage : guestLanguage);
-
-      if (last?.role === 'agent' && !last.isFinal) {
+      if (activeAgentTurn?.role === 'agent' && !activeAgentTurn.isFinal) {
         const updatedTurn: Partial<ConversationTurn> = {
-          text: last.text + text,
-          detectedSpeaker: speakerRole,
-          detectedLanguage: targetLang
+          ...metadata,
         };
+
+        if (text) {
+          updatedTurn.text = agentTurnHasContentRef.current
+            ? activeAgentTurn.text + text
+            : text;
+          agentTurnHasContentRef.current = true;
+        }
+
         if (groundingChunks) {
           updatedTurn.groundingChunks = [
-            ...(last.groundingChunks || []),
+            ...(activeAgentTurn.groundingChunks || []),
             ...groundingChunks,
           ];
         }
-        updateLastTurn(updatedTurn);
-      } else {
-          addTurn({ 
-            role: 'agent', 
-            text, 
-            isFinal: false, 
-            groundingChunks,
-            detectedSpeaker: speakerRole,
-            detectedLanguage: targetLang
-          });
+
+        updateTurnAt(activeAgentTurnIndex!, updatedTurn);
+        return;
       }
+
+      createAgentTurn(text, false, groundingChunks, true);
     };
 
     const handleTurnComplete = () => {
-      const { turns, updateLastTurn } = useLogStore.getState();
-      const last = turns[turns.length - 1];
+      const { turns, updateTurnAt } = useLogStore.getState();
+      const activeAgentTurnIndex = activeAgentTurnIndexRef.current;
+      const activeUserTurnIndex = activeUserTurnIndexRef.current;
 
-      if (last && !last.isFinal) {
-        updateLastTurn({ isFinal: true });
-        const updatedTurns = useLogStore.getState().turns;
+      const turnToFinalize =
+        activeAgentTurnIndex !== null && turns[activeAgentTurnIndex]
+          ? activeAgentTurnIndex
+          : activeUserTurnIndex !== null && turns[activeUserTurnIndex]
+            ? activeUserTurnIndex
+            : null;
 
-        if (user) {
-          updateUserConversations(user.id, updatedTurns);
-        }
-
-        const finalAgentTurn = updatedTurns[updatedTurns.length - 1];
-
-        if (finalAgentTurn?.role === 'agent' && finalAgentTurn?.text) {
-          const agentTurnIndex = updatedTurns.length - 1;
-          let correspondingUserTurn = null;
-          for (let i = agentTurnIndex - 1; i >= 0; i--) {
-            if (updatedTurns[i].role === 'user') {
-              correspondingUserTurn = updatedTurns[i];
-              break;
-            }
-          }
-
-          if (correspondingUserTurn?.text) {
-            const translatedText = finalAgentTurn.text.trim();
-            addHistoryItem({
-              sourceText: correspondingUserTurn.text.trim(),
-              translatedText: translatedText,
-              lang1: guestLanguage,
-              lang2: staffLanguage
-            });
-          }
-        }
+      if (turnToFinalize !== null && !turns[turnToFinalize].isFinal) {
+        updateTurnAt(turnToFinalize, { isFinal: true });
       }
+
+      const updatedTurns = useLogStore.getState().turns;
+
+      if (user) {
+        updateUserConversations(user.id, updatedTurns);
+      }
+
+      const finalAgentTurn =
+        activeAgentTurnIndex !== null ? updatedTurns[activeAgentTurnIndex] : undefined;
+      const correspondingUserTurn =
+        activeUserTurnIndex !== null ? updatedTurns[activeUserTurnIndex] : undefined;
+
+      if (finalAgentTurn?.role === 'agent' && finalAgentTurn.text && correspondingUserTurn?.text) {
+        addHistoryItem({
+          sourceText: correspondingUserTurn.text.trim(),
+          translatedText: finalAgentTurn.text.trim(),
+          lang1: correspondingUserTurn.detectedLanguage || AUTO_DETECT_LABEL,
+          lang2: finalAgentTurn.detectedLanguage || AUTO_DETECT_LABEL,
+        });
+      }
+
+      activeAgentTurnIndexRef.current = null;
+      agentTurnHasContentRef.current = false;
     };
     const handleToolCall = (toolCall: LiveServerToolCall) => {
       const fc = toolCall.functionCalls.find(f => f.name === 'report_guest_language');
       if (fc) {
         const { language } = fc.args as any;
         if (language) {
-          const { turns } = useLogStore.getState();
-          setLastGuestLanguage(language);
-          
-          // Update the most recent user turn with the detected language and speaker
-          for (let i = turns.length - 1; i >= 0; i--) {
-            if (turns[i].role === 'user') {
-              useLogStore.getState().updateLastTurn({ 
-                detectedSpeaker: 'Guest',
-                detectedLanguage: language 
-              });
-              break;
-            }
+          const settings = useSettings.getState();
+          settings.setLastGuestLanguage(language);
+
+          const { turns, updateTurnAt } = useLogStore.getState();
+          const userTurnIndex =
+            activeUserTurnIndexRef.current ?? findLastUserTurnIndex(turns);
+
+          if (userTurnIndex !== null) {
+            updateTurnAt(userTurnIndex, {
+              detectedSpeaker: 'Guest',
+              detectedLanguage: language,
+            });
           }
+
+          const agentTurnIndex = activeAgentTurnIndexRef.current;
+          if (agentTurnIndex !== null && turns[agentTurnIndex]?.role === 'agent') {
+            updateTurnAt(agentTurnIndex, {
+              detectedSpeaker: 'Guest',
+              detectedLanguage: settings.staffLanguage,
+            });
+          }
+
           // Send response back to satisfy the client
           client.sendToolResponse({
             functionResponses: toolCall.functionCalls.map(f => ({
@@ -238,7 +356,7 @@ export default function StreamingConsole() {
       client.off('turncomplete', handleTurnComplete);
       client.off('toolcall', handleToolCall);
     };
-  }, [client, addHistoryItem, user, guestLanguage, staffLanguage]);
+  }, [client, addHistoryItem, user]);
 
   return (
     <div className="transcription-container">
