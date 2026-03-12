@@ -7,11 +7,58 @@ import { createClient } from '@supabase/supabase-js';
 import { create } from 'zustand';
 import { ConversationTurn } from './state';
 
+type PersistenceTable = 'translations' | 'user_settings';
+
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.trim();
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 const hasSupabaseConfig = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 let hasLoggedMissingSupabaseConfig = false;
-const disabledPersistenceTables = new Set<'translations' | 'user_settings'>();
+const DISABLED_TABLES_STORAGE_KEY = 'dualt-disabled-supabase-tables';
+
+const loadDisabledPersistenceTables = (): Set<PersistenceTable> => {
+  if (typeof window === 'undefined') {
+    return new Set<PersistenceTable>();
+  }
+
+  try {
+    const raw = window.localStorage.getItem(DISABLED_TABLES_STORAGE_KEY);
+    if (!raw) {
+      return new Set<PersistenceTable>();
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return new Set<PersistenceTable>();
+    }
+
+    return new Set(
+      parsed.filter(
+        (value): value is PersistenceTable =>
+          value === 'translations' || value === 'user_settings',
+      ),
+    );
+  } catch {
+    return new Set<PersistenceTable>();
+  }
+};
+
+const persistDisabledPersistenceTables = (tables: Set<PersistenceTable>) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(
+      DISABLED_TABLES_STORAGE_KEY,
+      JSON.stringify(Array.from(tables)),
+    );
+  } catch {
+    // Ignore storage failures and keep the in-memory fallback.
+  }
+};
+
+const disabledPersistenceTables = loadDisabledPersistenceTables();
+const inFlightConversationFetches = new Map<string, Promise<ConversationTurn[]>>();
 
 export const supabase = hasSupabaseConfig
   ? createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!)
@@ -54,18 +101,19 @@ const isMissingPersistenceResourceError = (error: unknown) => {
   );
 };
 
-const disablePersistenceTable = (table: 'translations' | 'user_settings') => {
+const disablePersistenceTable = (table: PersistenceTable) => {
   if (disabledPersistenceTables.has(table)) {
     return;
   }
 
   disabledPersistenceTables.add(table);
+  persistDisabledPersistenceTables(disabledPersistenceTables);
   console.warn(
     `Supabase persistence for "${table}" is disabled because the table or REST endpoint is unavailable.`
   );
 };
 
-const canUsePersistenceTable = (table: 'translations' | 'user_settings') =>
+const canUsePersistenceTable = (table: PersistenceTable) =>
   !disabledPersistenceTables.has(table);
 
 // --- AUTH STORE ---
@@ -126,27 +174,42 @@ export const fetchUserConversations = async (userId: string): Promise<Conversati
   const client = getSupabaseClient();
   if (!client || !canUsePersistenceTable('translations')) return [];
 
-  const { data, error } = await client
-    .from('translations')
-    .select('*')
-    .eq('user_id', userId)
-    .order('timestamp', { ascending: true });
-
-  if (error) {
-    if (isMissingPersistenceResourceError(error)) {
-      disablePersistenceTable('translations');
-      return [];
-    }
-    console.error('Error fetching history:', error);
-    return [];
+  const existingRequest = inFlightConversationFetches.get(userId);
+  if (existingRequest) {
+    return existingRequest;
   }
 
-  return data.map(item => ({
-    timestamp: new Date(item.timestamp),
-    role: item.role,
-    text: item.text,
-    isFinal: true
-  }));
+  const request = (async () => {
+    const { data, error } = await client
+      .from('translations')
+      .select('*')
+      .eq('user_id', userId)
+      .order('timestamp', { ascending: true });
+
+    if (error) {
+      if (isMissingPersistenceResourceError(error)) {
+        disablePersistenceTable('translations');
+        return [];
+      }
+      console.error('Error fetching history:', error);
+      return [];
+    }
+
+    return data.map(item => ({
+      timestamp: new Date(item.timestamp),
+      role: item.role,
+      text: item.text,
+      isFinal: true
+    }));
+  })();
+
+  inFlightConversationFetches.set(userId, request);
+
+  try {
+    return await request;
+  } finally {
+    inFlightConversationFetches.delete(userId);
+  }
 };
 
 export const updateUserConversations = async (userId: string, turns: ConversationTurn[]) => {
