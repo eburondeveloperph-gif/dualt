@@ -26,7 +26,7 @@ export const DEFAULT_LIVE_API_MODEL =
 
 export const DEFAULT_VOICE = 'Charon';
 export const DEFAULT_VOICE_STAFF = 'Orus';
-export const DEFAULT_VOICE_GUEST = 'Charon';
+export const DEFAULT_VOICE_GUEST = 'Aoede';
 
 export const AVAILABLE_VOICES: { name: string; value: string }[] = [
   { name: 'Gold', value: 'Zephyr' },

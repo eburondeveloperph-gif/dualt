@@ -1251,6 +1251,23 @@ form button:first-of-type {
   padding-right: 30px;
 }
 
+.settings-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--gray-700);
+  border-radius: 8px;
+  background: var(--gray-1000);
+  color: var(--text);
+}
+
+.settings-info-row strong {
+  color: var(--gray-300);
+  font-weight: 500;
+}
+
 .save-settings-button {
   display: flex;
   justify-content: center;

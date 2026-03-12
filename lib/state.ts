@@ -3,6 +3,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
+// cspell:ignore genai
 import { create } from 'zustand';
 import { DEFAULT_LIVE_API_MODEL, DEFAULT_VOICE_STAFF, DEFAULT_VOICE_GUEST } from './constants';
 import {
@@ -26,7 +27,7 @@ const generateSystemPrompt = (lang1: string, lang2: string, topic: string) => {
     
     RULES:
     1. **Double Interaction Mode**: You are translating for TWO distinct speakers.
-    2. **Staff (${lang1})**: When you hear ${lang1}, assume it is the Staff. Translate it IMMMEDIATELY to the Guest's language (the language they last spoke).
+    2. **Staff (${lang1})**: When you hear ${lang1}, assume it is the Staff. Translate it IMMEDIATELY to the Guest's language (the language they last spoke).
        - *Crucial*: If the Guest hasn't spoken yet, or their language is not yet detected, default to English for the Staff's translation.
     3. **Guest (Auto Detect)**: When you hear any language that is NOT ${lang1}, assume it is the Guest. Translate it IMMEDIATELY to ${lang1}.
     4. **Memory**: Lock on to the language detected from the Guest. Use this specific language as the target for all subsequent translations of the Staff's ${lang1} speech.

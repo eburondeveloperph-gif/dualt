@@ -46,7 +46,10 @@ export const useAuth = create<AuthState>((set) => ({
 }));
 
 // --- DATABASE HELPERS ---
-export const updateUserSettings = async (userId: string, newSettings: Partial<{ systemPrompt: string; voice: string }>) => {
+export const updateUserSettings = async (
+  userId: string,
+  newSettings: Partial<{ systemPrompt: string; voice1: string; voice2: string }>
+) => {
   const { error } = await supabase
     .from('user_settings')
     .upsert({ user_id: userId, ...newSettings });

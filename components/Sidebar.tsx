@@ -4,7 +4,7 @@
 */
 import { useSettings, useUI } from '../lib/state';
 import c from 'classnames';
-import { AVAILABLE_VOICES, AVAILABLE_LANGUAGES } from '../lib/constants';
+import { AVAILABLE_LANGUAGES } from '../lib/constants';
 import { useLiveAPIContext } from '../contexts/LiveAPIContext';
 import { useAuth } from '../lib/auth';
 import { useHistoryStore } from '../lib/history';
@@ -13,7 +13,7 @@ export default function Sidebar() {
   const { isSidebarOpen, toggleSidebar, activeTab, setActiveTab } = useUI();
   const {
     systemPrompt, voice1, voice2, language1, language2, topic,
-    setSystemPrompt, setVoice1, setVoice2, setLanguage1, setLanguage2, setTopic
+    setSystemPrompt, setLanguage1, setLanguage2, setTopic
   } = useSettings();
   const { connected } = useLiveAPIContext();
   const { isSuperAdmin } = useAuth();
@@ -61,23 +61,17 @@ export default function Sidebar() {
               )}
               <label>
                 Staff Voice
-                <select value={voice1} onChange={e => setVoice1(e.target.value)}>
-                  {AVAILABLE_VOICES.map(v => (
-                    <option key={v.value} value={v.value}>
-                      {v.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="settings-info-row">
+                  <strong>Fixed</strong>
+                  <span>{voice1}</span>
+                </div>
               </label>
               <label>
                 Guest Voice
-                <select value={voice2} onChange={e => setVoice2(e.target.value)}>
-                  {AVAILABLE_VOICES.map(v => (
-                    <option key={v.value} value={v.value}>
-                      {v.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="settings-info-row">
+                  <strong>Fixed</strong>
+                  <span>{voice2}</span>
+                </div>
               </label>
               <label>
                 Permanent Staff Language
